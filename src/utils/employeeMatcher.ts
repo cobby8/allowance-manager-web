@@ -43,10 +43,6 @@ export const matchEmployeesWithWorkRecords = (
             return false;
         });
 
-        // Calculate totals
-        const totalGrossAmount = matchedRecords.reduce((sum, r) => sum + r.grossAmount, 0);
-        const totalNetAmount = matchedRecords.reduce((sum, r) => sum + r.netAmount, 0);
-
         // Determine match status
         let matchStatus: 'matched' | 'unmatched' | 'partial';
 
