@@ -47,6 +47,20 @@ function AppContent() {
           <h1 className="app-title">정산 자동화 시스템</h1>
           <p className="app-subtitle">대회 후 정산자료를 자동으로 생성하세요</p>
         </div>
+        <a
+          href="https://github.com/cobby8/allowance-manager-web/blob/main/USER_MANUAL.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="help-button"
+          title="사용 매뉴얼 보기"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          사용 매뉴얼
+        </a>
       </header>
 
       <main className="app-main">
