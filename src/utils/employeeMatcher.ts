@@ -15,34 +15,6 @@ export const matchEmployeesWithWorkRecords = (
     workRecords: WorkRecord[]
 ): SettlementData[] => {
     return employees.map(employee => {
-        // Find all work records for this employee
-        const matchedRecords = workRecords.filter(record => {
-            // Normalize values
-            const empResId = normalize(employee.residentId);
-            const recResId = normalize(record.residentId);
-            const empName = normalize(employee.name);
-            const recName = normalize(record.name);
-            const empPhone = normalize(employee.phoneNumber);
-            const recPhone = normalize(record.phoneNumber);
-            const empAccount = normalize(employee.accountNumber);
-            const recAccount = normalize(record.accountNumber);
-
-            // 1. Resident ID Match (Strongest)
-            if (empResId && recResId && empResId === recResId) return true;
-
-            // 2. Name + Phone Match (Strong)
-            if (empName && recName && empName === recName) {
-                if (empPhone && recPhone && empPhone === recPhone) return true;
-            }
-
-            // 3. Name + Account Match (Strong)
-            if (empName && recName && empName === recName) {
-                if (empAccount && recAccount && empAccount === recAccount) return true;
-            }
-
-            return false;
-        });
-
         // Determine match status
         let matchStatus: 'matched' | 'unmatched' | 'partial';
 
