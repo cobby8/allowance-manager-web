@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { saveAs } from 'file-saver';
 import { fontData } from './NanumGothic-Regular-normal';
 import type { Employee, SettlementData } from '../types';
 import { fetchImageAsBase64 } from './imageService';
@@ -111,7 +112,8 @@ export const generatePayslip = async (data: Employee | SettlementData) => {
         });
     }
 
-    doc.save(`${data.name}_지급명세서.pdf`);
+    const blob = doc.output('blob');
+    saveAs(blob, `${data.name}_지급명세서.pdf`);
 };
 
 export const generateEvidenceDocument = async (data: Employee | SettlementData) => {
@@ -217,7 +219,8 @@ export const generateEvidenceDocument = async (data: Employee | SettlementData) 
         doc.text('이미지 없음 (데이터 없음)', brX + boxWidth / 2, brY + boxHeight / 2, { align: 'center' });
     }
 
-    doc.save(`${data.name}_증빙자료.pdf`);
+    const blob = doc.output('blob');
+    saveAs(blob, `${data.name}_증빙자료.pdf`);
 };
 
 export const generateBulkPayslips = async (dataList: (Employee | SettlementData)[]) => {
@@ -284,7 +287,8 @@ export const generateBulkPayslips = async (dataList: (Employee | SettlementData)
             });
         }
     }
-    doc.save(`전체_지급명세서_${new Date().toLocaleDateString()}.pdf`);
+    const blob = doc.output('blob');
+    saveAs(blob, `전체_지급명세서_${new Date().toLocaleDateString()}.pdf`);
 };
 
 export const generateBulkEvidence = async (dataList: (Employee | SettlementData)[]) => {
@@ -355,5 +359,6 @@ export const generateBulkEvidence = async (dataList: (Employee | SettlementData)
         drawBoxTitle('자격증', brX, brY, boxWidth);
         if (data.licenseImage && licenseData) drawImageProp(licenseData, brX + 5, brY + 15, boxWidth - 10, boxHeight - 20);
     }
-    doc.save(`전체_증빙자료_${new Date().toLocaleDateString()}.pdf`);
+    const blob = doc.output('blob');
+    saveAs(blob, `전체_증빙자료_${new Date().toLocaleDateString()}.pdf`);
 };

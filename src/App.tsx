@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import DataGrid from './components/DataGrid';
+import TutorialModal from './components/TutorialModal';
 import './App.css';
 
 function AppContent() {
@@ -18,6 +19,7 @@ function AppContent() {
 
   const [baseSheetId, setBaseSheetId] = useState('');
   const [workSheetId, setWorkSheetId] = useState('');
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
   const handleLoadBase = async () => {
     if (baseSheetId.trim()) {
@@ -47,10 +49,8 @@ function AppContent() {
           <h1 className="app-title">정산 자동화 시스템</h1>
           <p className="app-subtitle">대회 후 정산자료를 자동으로 생성하세요</p>
         </div>
-        <a
-          href="https://github.com/cobby8/allowance-manager-web/blob/main/USER_MANUAL.md"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => setIsTutorialOpen(true)}
           className="help-button"
           title="사용 매뉴얼 보기"
         >
@@ -60,8 +60,10 @@ function AppContent() {
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           사용 매뉴얼
-        </a>
+        </button>
       </header>
+
+      <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
 
       <main className="app-main">
         {error && (
