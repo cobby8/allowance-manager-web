@@ -43,28 +43,6 @@ const formatDate = (dateStr: string): string => {
     return dateStr; // give up, return original
 };
 
-// Helper function to save PDF using native anchor tag with improved compatibility
-const savePdf = (doc: jsPDF, filename: string) => {
-    // Explicitly create a Blob with the correct MIME type
-    const blob = new Blob([doc.output('blob')], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none'; // Ensure link is not visible
-
-    document.body.appendChild(link);
-    link.click();
-
-    // Delay cleanup to ensure the download process has started
-    // This is critical for some browsers/environments to correctly capture the filename
-    setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }, 100);
-};
-
 export const generatePayslip = async (data: Employee | SettlementData) => {
     const doc = new jsPDF();
     loadKoreanFont(doc);
@@ -133,7 +111,7 @@ export const generatePayslip = async (data: Employee | SettlementData) => {
         });
     }
 
-    savePdf(doc, `${data.name}_지급명세서.pdf`);
+    doc.save(`${data.name}_지급명세서.pdf`);
 };
 
 export const generateEvidenceDocument = async (data: Employee | SettlementData) => {
@@ -239,7 +217,7 @@ export const generateEvidenceDocument = async (data: Employee | SettlementData) 
         doc.text('이미지 없음 (데이터 없음)', brX + boxWidth / 2, brY + boxHeight / 2, { align: 'center' });
     }
 
-    savePdf(doc, `${data.name}_증빙자료.pdf`);
+    doc.save(`${data.name}_증빙자료.pdf`);
 };
 
 export const generateBulkPayslips = async (dataList: (Employee | SettlementData)[]) => {
@@ -306,7 +284,7 @@ export const generateBulkPayslips = async (dataList: (Employee | SettlementData)
             });
         }
     }
-    savePdf(doc, `전체_지급명세서_${new Date().toLocaleDateString()}.pdf`);
+    doc.save(`전체_지급명세서_${new Date().toLocaleDateString()}.pdf`);
 };
 
 export const generateBulkEvidence = async (dataList: (Employee | SettlementData)[]) => {
@@ -377,5 +355,5 @@ export const generateBulkEvidence = async (dataList: (Employee | SettlementData)
         drawBoxTitle('자격증', brX, brY, boxWidth);
         if (data.licenseImage && licenseData) drawImageProp(licenseData, brX + 5, brY + 15, boxWidth - 10, boxHeight - 20);
     }
-    savePdf(doc, `전체_증빙자료_${new Date().toLocaleDateString()}.pdf`);
+    doc.save(`전체_증빙자료_${new Date().toLocaleDateString()}.pdf`);
 };
