@@ -43,17 +43,26 @@ const formatDate = (dateStr: string): string => {
     return dateStr; // give up, return original
 };
 
-// Helper function to save PDF using native anchor tag
+// Helper function to save PDF using native anchor tag with improved compatibility
 const savePdf = (doc: jsPDF, filename: string) => {
-    const blob = doc.output('blob');
+    // Explicitly create a Blob with the correct MIME type
+    const blob = new Blob([doc.output('blob')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+
     link.href = url;
     link.download = filename;
+    link.style.display = 'none'; // Ensure link is not visible
+
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+
+    // Delay cleanup to ensure the download process has started
+    // This is critical for some browsers/environments to correctly capture the filename
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 100);
 };
 
 export const generatePayslip = async (data: Employee | SettlementData) => {
