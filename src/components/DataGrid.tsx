@@ -262,7 +262,7 @@ export default function DataGrid({ data, hasWorkRecords = false, encryptionKey }
                                     </div>
                                     <div className="info-row">
                                         <span className="info-label">계좌번호</span>
-                                        <span className="info-value">{employee.accountNumber || '-'}</span>
+                                        <span className="info-value">{employee.accountNumberMasked || '-'}</span>
                                     </div>
 
                                     {isSettlementData(employee) && employee.workRecords.length > 0 && (
