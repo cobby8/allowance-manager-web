@@ -24,27 +24,43 @@ function AppContent() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [encryptionKey, setEncryptionKey] = useState('');
 
+  // Extract sheet ID from URL or return as-is if already an ID
+  const extractSheetId = (input: string): string => {
+    const trimmed = input.trim();
+    // Check if it's a URL
+    if (trimmed.includes('docs.google.com/spreadsheets')) {
+      // Extract ID from URL: https://docs.google.com/spreadsheets/d/{ID}/...
+      const match = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      return match ? match[1] : trimmed;
+    }
+    // Otherwise assume it's already an ID
+    return trimmed;
+  };
+
   const handleLoadBase = async () => {
-    if (baseSheetId.trim()) {
+    const sheetId = extractSheetId(baseSheetId);
+    if (sheetId) {
       if (!encryptionKey) {
         setIsPasswordModalOpen(true);
         return;
       }
-      await loadBaseData(baseSheetId, encryptionKey);
+      await loadBaseData(sheetId, encryptionKey);
     }
   };
 
   const handlePasswordSubmit = async (password: string) => {
     setEncryptionKey(password);
     setIsPasswordModalOpen(false);
-    if (baseSheetId.trim()) {
-      await loadBaseData(baseSheetId, password);
+    const sheetId = extractSheetId(baseSheetId);
+    if (sheetId) {
+      await loadBaseData(sheetId, password);
     }
   };
 
   const handleLoadWork = async () => {
-    if (workSheetId.trim()) {
-      await loadWorkRecords(workSheetId, encryptionKey);
+    const sheetId = extractSheetId(workSheetId);
+    if (sheetId) {
+      await loadWorkRecords(sheetId, encryptionKey);
     }
   };
 
@@ -98,7 +114,7 @@ function AppContent() {
 
             <div className="form-group">
               <label htmlFor="baseSheetId" className="form-label">
-                베이스 데이터 시트 ID
+                베이스 데이터 시트 URL 또는 ID
               </label>
               <input
                 id="baseSheetId"
@@ -106,7 +122,7 @@ function AppContent() {
                 value={baseSheetId}
                 onChange={(e) => setBaseSheetId(e.target.value)}
                 onKeyPress={(e) => handleKeyPress(e, handleLoadBase)}
-                placeholder="예: 1Vzo1a5jwx1Mx0w41fOEJHy-bq2KPj6pLU7ySUbGw29E"
+                placeholder="예: https://docs.google.com/spreadsheets/d/1Vzo.../edit 또는 시트 ID"
                 className="form-input"
                 disabled={loading}
               />
@@ -155,7 +171,7 @@ function AppContent() {
 
                 <div className="form-group">
                   <label htmlFor="workSheetId" className="form-label">
-                    근무 내역 시트 ID
+                    근무 내역 시트 URL 또는 ID
                   </label>
                   <input
                     id="workSheetId"
@@ -163,7 +179,7 @@ function AppContent() {
                     value={workSheetId}
                     onChange={(e) => setWorkSheetId(e.target.value)}
                     onKeyPress={(e) => handleKeyPress(e, handleLoadWork)}
-                    placeholder="예: 10ePPpdm9h6Gqe91HefJr2TMYE11dNstrZtICZRXLTuk"
+                    placeholder="예: https://docs.google.com/spreadsheets/d/10eP.../edit 또는 시트 ID"
                     className="form-input"
                     disabled={loading}
                   />
