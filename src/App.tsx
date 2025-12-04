@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import DataGrid from './components/DataGrid';
-import TutorialModal from './components/TutorialModal';
+import InteractiveTutorial from './components/InteractiveTutorial';
 import { PasswordModal } from './components/PasswordModal';
 import './App.css';
 
@@ -20,9 +20,18 @@ function AppContent() {
 
   const [baseSheetId, setBaseSheetId] = useState('');
   const [workSheetId, setWorkSheetId] = useState('');
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isTutorialActive, setIsTutorialActive] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [encryptionKey, setEncryptionKey] = useState('');
+
+  // Check if this is the first visit
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('allowance-manager-visited');
+    if (!hasVisited) {
+      setIsTutorialActive(true);
+      localStorage.setItem('allowance-manager-visited', 'true');
+    }
+  }, []);
 
   // Extract sheet ID from URL or return as-is if already an ID
   const extractSheetId = (input: string): string => {
@@ -81,20 +90,24 @@ function AppContent() {
           <p className="app-subtitle">대회 후 정산자료를 자동으로 생성하세요</p>
         </div>
         <button
-          onClick={() => setIsTutorialOpen(true)}
+          onClick={() => setIsTutorialActive(true)}
           className="help-button"
-          title="사용 매뉴얼 보기"
+          title="튜토리얼 보기"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          사용 매뉴얼
+          튜토리얼
         </button>
       </header>
 
-      <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
+      <InteractiveTutorial
+        isActive={isTutorialActive}
+        onComplete={() => setIsTutorialActive(false)}
+        onSkip={() => setIsTutorialActive(false)}
+      />
       <PasswordModal isOpen={isPasswordModalOpen} onSubmit={handlePasswordSubmit} />
 
       <main className="app-main">
@@ -125,6 +138,7 @@ function AppContent() {
                 placeholder="예: https://docs.google.com/spreadsheets/d/1Vzo.../edit 또는 시트 ID"
                 className="form-input"
                 disabled={loading}
+                data-tutorial-id="base-sheet-input"
               />
             </div>
 
@@ -132,6 +146,7 @@ function AppContent() {
               onClick={handleLoadBase}
               disabled={loading || !baseSheetId.trim()}
               className="btn-primary"
+              data-tutorial-id="load-base-button"
             >
               {loading ? (
                 <>
@@ -182,6 +197,7 @@ function AppContent() {
                     placeholder="예: https://docs.google.com/spreadsheets/d/10eP.../edit 또는 시트 ID"
                     className="form-input"
                     disabled={loading}
+                    data-tutorial-id="work-sheet-input"
                   />
                 </div>
 
@@ -202,11 +218,13 @@ function AppContent() {
               </div>
             )}
 
-            <DataGrid
-              data={displayData}
-              hasWorkRecords={hasWorkRecords}
-              encryptionKey={encryptionKey}
-            />
+            <div data-tutorial-id={hasWorkRecords ? "settlement-data" : "employee-grid"}>
+              <DataGrid
+                data={displayData}
+                hasWorkRecords={hasWorkRecords}
+                encryptionKey={encryptionKey}
+              />
+            </div>
           </div>
         )}
       </main>
