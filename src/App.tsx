@@ -210,6 +210,15 @@ function AppContent() {
           </div>
         )}
       </main>
+      <footer style={{
+        textAlign: 'center',
+        padding: '20px',
+        color: '#666',
+        fontSize: '12px',
+        marginTop: 'auto'
+      }}>
+        v1.0.2 (Build: {new Date().toLocaleString()})
+      </footer>
     </div>
   );
 }

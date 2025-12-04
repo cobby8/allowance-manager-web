@@ -16,7 +16,7 @@ export const matchEmployeesWithWorkRecords = (
     workRecords: WorkRecord[],
     encryptionKey: string
 ): SettlementData[] => {
-    return employees.map(employee => {
+    return employees.map((employee, index) => {
         // Determine match status
         let matchStatus: 'matched' | 'unmatched' | 'partial';
 
@@ -31,6 +31,10 @@ export const matchEmployeesWithWorkRecords = (
             const recResIdDecrypted = decrypt(record.residentId, encryptionKey);
             const empResId = normalize(empResIdDecrypted);
             const recResId = normalize(recResIdDecrypted);
+
+            if (index === 0) {
+                console.log(`[Debug Match] Emp: ${empName} (${empResId}), Rec: ${recName} (${recResId})`);
+            }
 
             // Include if Name matches OR Resident ID matches
             return (empName && recName && empName === recName) || (empResId && recResId && empResId === recResId);
@@ -78,12 +82,15 @@ export const matchEmployeesWithWorkRecords = (
  */
 export const getUnmatchedWorkRecords = (
     employees: Employee[],
-    workRecords: WorkRecord[]
+    workRecords: WorkRecord[],
+    encryptionKey: string
 ): WorkRecord[] => {
     return workRecords.filter(record => {
         return !employees.some(employee => {
-            const empResId = normalize(employee.residentId);
-            const recResId = normalize(record.residentId);
+            const empResIdDecrypted = decrypt(employee.residentId, encryptionKey);
+            const recResIdDecrypted = decrypt(record.residentId, encryptionKey);
+            const empResId = normalize(empResIdDecrypted);
+            const recResId = normalize(recResIdDecrypted);
             const empName = normalize(employee.name);
             const recName = normalize(record.name);
 
