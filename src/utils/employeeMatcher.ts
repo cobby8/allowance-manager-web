@@ -1,4 +1,5 @@
 import type { Employee, WorkRecord, SettlementData } from '../types';
+import { decrypt } from './cryptoService';
 
 /**
  * Normalizes a string for comparison by removing spaces and hyphens
@@ -12,7 +13,8 @@ const normalize = (str: string): string => {
  */
 export const matchEmployeesWithWorkRecords = (
     employees: Employee[],
-    workRecords: WorkRecord[]
+    workRecords: WorkRecord[],
+    encryptionKey: string
 ): SettlementData[] => {
     return employees.map(employee => {
         // Determine match status
@@ -23,8 +25,12 @@ export const matchEmployeesWithWorkRecords = (
         const potentialRecords = workRecords.filter(record => {
             const empName = normalize(employee.name);
             const recName = normalize(record.name);
-            const empResId = normalize(employee.residentId);
-            const recResId = normalize(record.residentId);
+
+            // Decrypt resident IDs for comparison
+            const empResIdDecrypted = decrypt(employee.residentId, encryptionKey);
+            const recResIdDecrypted = decrypt(record.residentId, encryptionKey);
+            const empResId = normalize(empResIdDecrypted);
+            const recResId = normalize(recResIdDecrypted);
 
             // Include if Name matches OR Resident ID matches
             return (empName && recName && empName === recName) || (empResId && recResId && empResId === recResId);
@@ -39,8 +45,11 @@ export const matchEmployeesWithWorkRecords = (
         } else {
             // Check if ALL records meet strict criteria
             const allStrictMatch = finalRecords.every(record => {
-                const empResId = normalize(employee.residentId);
-                const recResId = normalize(record.residentId);
+                // Decrypt resident IDs for comparison
+                const empResIdDecrypted = decrypt(employee.residentId, encryptionKey);
+                const recResIdDecrypted = decrypt(record.residentId, encryptionKey);
+                const empResId = normalize(empResIdDecrypted);
+                const recResId = normalize(recResIdDecrypted);
                 const empPhone = normalize(employee.phoneNumber);
                 const recPhone = normalize(record.phoneNumber);
 

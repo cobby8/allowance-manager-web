@@ -26,6 +26,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [settlementData, setSettlementData] = useState<SettlementData[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [encryptionKey, setEncryptionKey] = useState<string>('');
 
     const loadBaseData = async (sheetId: string, encryptionKey: string) => {
         setLoading(true);
@@ -34,10 +35,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const rawData = await fetchSheetData(sheetId, encryptionKey);
             const processedData = processSheetData(rawData);
             setEmployees(processedData);
+            setEncryptionKey(encryptionKey);
 
             // If work records already loaded, match them
             if (workRecords.length > 0) {
-                const matched = matchEmployeesWithWorkRecords(processedData, workRecords);
+                const matched = matchEmployeesWithWorkRecords(processedData, workRecords, encryptionKey);
                 setSettlementData(matched);
             }
         } catch (err) {
@@ -57,7 +59,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             // If base data already loaded, match them
             if (employees.length > 0) {
-                const matched = matchEmployeesWithWorkRecords(employees, records);
+                const matched = matchEmployeesWithWorkRecords(employees, records, encryptionKey);
                 setSettlementData(matched);
             }
         } catch (err) {
