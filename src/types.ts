@@ -10,6 +10,8 @@ export interface Employee {
     phoneNumber: string;
     bankName: string;
     accountNumber: string;
+    residentIdMasked?: string;
+    accountNumberMasked?: string;
     workDate: string;
     workPlace: string;
     dailyRate: string;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import DataGrid from './components/DataGrid';
 import TutorialModal from './components/TutorialModal';
+import { PasswordModal } from './components/PasswordModal';
 import './App.css';
 
 function AppContent() {
@@ -20,10 +21,24 @@ function AppContent() {
   const [baseSheetId, setBaseSheetId] = useState('');
   const [workSheetId, setWorkSheetId] = useState('');
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [encryptionKey, setEncryptionKey] = useState('');
 
   const handleLoadBase = async () => {
     if (baseSheetId.trim()) {
-      await loadBaseData(baseSheetId);
+      if (!encryptionKey) {
+        setIsPasswordModalOpen(true);
+        return;
+      }
+      await loadBaseData(baseSheetId, encryptionKey);
+    }
+  };
+
+  const handlePasswordSubmit = async (password: string) => {
+    setEncryptionKey(password);
+    setIsPasswordModalOpen(false);
+    if (baseSheetId.trim()) {
+      await loadBaseData(baseSheetId, password);
     }
   };
 
@@ -64,6 +79,7 @@ function AppContent() {
       </header>
 
       <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
+      <PasswordModal isOpen={isPasswordModalOpen} onSubmit={handlePasswordSubmit} />
 
       <main className="app-main">
         {error && (
@@ -170,7 +186,11 @@ function AppContent() {
               </div>
             )}
 
-            <DataGrid data={displayData} hasWorkRecords={hasWorkRecords} />
+            <DataGrid
+              data={displayData}
+              hasWorkRecords={hasWorkRecords}
+              encryptionKey={encryptionKey}
+            />
           </div>
         )}
       </main>

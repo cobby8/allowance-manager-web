@@ -1,7 +1,8 @@
 import { read, utils } from 'xlsx';
 import { COLUMN_MAPPING, type RawSheetRow } from '../types';
+import { encrypt, maskResidentId, maskAccountNumber } from './cryptoService';
 
-export const fetchSheetData = async (sheetId: string): Promise<RawSheetRow[]> => {
+export const fetchSheetData = async (sheetId: string, encryptionKey: string): Promise<RawSheetRow[]> => {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
     try {
         const response = await fetch(url);
@@ -39,7 +40,20 @@ export const fetchSheetData = async (sheetId: string): Promise<RawSheetRow[]> =>
                 }
 
                 if (mappedKey) {
-                    mappedRow[mappedKey] = value;
+                    let finalValue = value;
+                    // Encrypt sensitive fields
+                    if (mappedKey === 'residentId') {
+                        const strValue = String(value).trim();
+                        finalValue = encrypt(strValue, encryptionKey);
+                        mappedRow['residentIdMasked'] = maskResidentId(strValue);
+                    } else if (mappedKey === 'accountNumber') {
+                        const strValue = String(value).trim();
+                        finalValue = encrypt(strValue, encryptionKey);
+                        mappedRow['accountNumberMasked'] = maskAccountNumber(strValue);
+                    }
+
+                    mappedRow[mappedKey] = finalValue;
+
                     // Debug phone number mapping
                     if (mappedKey === 'phoneNumber' && index < 3) {
                         console.log(`Phone mapping: "${key}" -> "${mappedKey}" = "${value}"`);

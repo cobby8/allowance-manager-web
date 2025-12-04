@@ -11,7 +11,7 @@ interface DataContextType {
     settlementData: SettlementData[];
     loading: boolean;
     error: string | null;
-    loadBaseData: (sheetId: string) => Promise<void>;
+    loadBaseData: (sheetId: string, encryptionKey: string) => Promise<void>;
     loadWorkRecords: (sheetId: string) => Promise<void>;
     resetData: () => void;
     hasBaseData: boolean;
@@ -27,11 +27,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const loadBaseData = async (sheetId: string) => {
+    const loadBaseData = async (sheetId: string, encryptionKey: string) => {
         setLoading(true);
         setError(null);
         try {
-            const rawData = await fetchSheetData(sheetId);
+            const rawData = await fetchSheetData(sheetId, encryptionKey);
             const processedData = processSheetData(rawData);
             setEmployees(processedData);
 

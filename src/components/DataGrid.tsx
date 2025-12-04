@@ -8,9 +8,10 @@ import './DataGrid.css';
 interface DataGridProps {
     data: (Employee | SettlementData)[];
     hasWorkRecords?: boolean;
+    encryptionKey: string;
 }
 
-export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps) {
+export default function DataGrid({ data, hasWorkRecords = false, encryptionKey }: DataGridProps) {
     // Type guard to check if data is SettlementData
     const isSettlementData = (item: Employee | SettlementData): item is SettlementData => {
         return hasWorkRecords && 'workRecords' in item;
@@ -35,7 +36,7 @@ export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps
     const handleGeneratePayslip = async (employee: Employee) => {
         try {
             setGeneratingId(`payslip-${employee.id}`);
-            await generatePayslip(employee);
+            await generatePayslip(employee, encryptionKey);
         } catch (error) {
             console.error('Failed to generate PDF', error);
             alert('PDF 생성에 실패했습니다.');
@@ -47,7 +48,7 @@ export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps
     const handleGenerateEvidence = async (employee: Employee) => {
         try {
             setGeneratingId(`evidence-${employee.id}`);
-            await generateEvidenceDocument(employee);
+            await generateEvidenceDocument(employee, encryptionKey);
         } catch (error) {
             console.error('Failed to generate PDF', error);
             alert('증빙자료 생성에 실패했습니다.');
@@ -80,7 +81,7 @@ export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps
         if (filteredData.length === 0) return;
         try {
             setIsBulkGenerating(true);
-            await generateBulkPayslips(filteredData);
+            await generateBulkPayslips(filteredData, encryptionKey);
         } catch (error) {
             console.error('Bulk download failed', error);
             alert('전체 다운로드에 실패했습니다.');
@@ -93,7 +94,7 @@ export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps
         if (filteredData.length === 0) return;
         try {
             setIsBulkGenerating(true);
-            await generateBulkEvidence(filteredData);
+            await generateBulkEvidence(filteredData, encryptionKey);
         } catch (error) {
             console.error('Bulk download failed', error);
             alert('전체 다운로드에 실패했습니다.');
@@ -199,7 +200,7 @@ export default function DataGrid({ data, hasWorkRecords = false }: DataGridProps
                                 <div className="employee-header">
                                     <div>
                                         <h3 className="employee-name">{employee.name}</h3>
-                                        <p className="employee-id">{employee.residentId}</p>
+                                        <p className="employee-id">{employee.residentIdMasked || '******-*******'}</p>
                                     </div>
                                     {isSettlementData(employee) && (
                                         <div>

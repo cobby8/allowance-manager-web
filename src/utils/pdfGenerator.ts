@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { fontData } from './NanumGothic-Regular-normal';
 import type { Employee, SettlementData } from '../types';
 import { fetchImageAsBase64 } from './imageService';
+import { decrypt } from './cryptoService';
 
 // Load Korean font
 const loadKoreanFont = (doc: jsPDF) => {
@@ -43,9 +44,13 @@ const formatDate = (dateStr: string): string => {
     return dateStr; // give up, return original
 };
 
-export const generatePayslip = async (data: Employee | SettlementData) => {
+export const generatePayslip = async (data: Employee | SettlementData, encryptionKey: string) => {
     const doc = new jsPDF();
     loadKoreanFont(doc);
+
+    // Decrypt sensitive data
+    const decryptedResidentId = decrypt(data.residentId, encryptionKey);
+    const decryptedAccountNumber = decrypt(data.accountNumber, encryptionKey);
 
     // Title
     doc.setFontSize(20);
@@ -55,9 +60,9 @@ export const generatePayslip = async (data: Employee | SettlementData) => {
 
     // Employee Info Table
     const empData = [
-        ['성명', data.name, '주민등록번호', data.residentId],
+        ['성명', data.name, '주민등록번호', decryptedResidentId],
         ['연락처', data.phoneNumber || data.address || '-', '소속', data.workPlace],
-        ['은행명', data.bankName, '계좌번호', data.accountNumber]
+        ['은행명', data.bankName, '계좌번호', decryptedAccountNumber]
     ];
     autoTable(doc, {
         startY: 35,
@@ -114,9 +119,13 @@ export const generatePayslip = async (data: Employee | SettlementData) => {
     doc.save(`${data.name}_지급명세서.pdf`);
 };
 
-export const generateEvidenceDocument = async (data: Employee | SettlementData) => {
+export const generateEvidenceDocument = async (data: Employee | SettlementData, encryptionKey: string) => {
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
     loadKoreanFont(doc);
+
+    // Decrypt sensitive data
+    const decryptedResidentId = decrypt(data.residentId, encryptionKey);
+    const decryptedAccountNumber = decrypt(data.accountNumber, encryptionKey);
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -160,10 +169,10 @@ export const generateEvidenceDocument = async (data: Employee | SettlementData) 
     let infoY = tlY + 25;
     const lineH = 12;
     doc.text(`성       명: ${data.name}`, infoX, infoY); infoY += lineH;
-    doc.text(`주민등록번호: ${data.residentId}`, infoX, infoY); infoY += lineH;
+    doc.text(`주민등록번호: ${decryptedResidentId}`, infoX, infoY); infoY += lineH;
     doc.text(`연 락 처: ${data.phoneNumber || data.address || '-'}`, infoX, infoY); infoY += lineH;
     doc.text(`은 행 명: ${data.bankName}`, infoX, infoY); infoY += lineH;
-    doc.text(`계좌번호: ${data.accountNumber}`, infoX, infoY);
+    doc.text(`계좌번호: ${decryptedAccountNumber}`, infoX, infoY);
 
     const idCardData = await processImage(data.idCardImage);
     const bankBookData = await processImage(data.bankBookImage);
@@ -220,21 +229,25 @@ export const generateEvidenceDocument = async (data: Employee | SettlementData) 
     doc.save(`${data.name}_증빙자료.pdf`);
 };
 
-export const generateBulkPayslips = async (dataList: (Employee | SettlementData)[]) => {
+export const generateBulkPayslips = async (dataList: (Employee | SettlementData)[], encryptionKey: string) => {
     const doc = new jsPDF();
     loadKoreanFont(doc);
 
     for (let i = 0; i < dataList.length; i++) {
         const data = dataList[i];
+        // Decrypt sensitive data
+        const decryptedResidentId = decrypt(data.residentId, encryptionKey);
+        const decryptedAccountNumber = decrypt(data.accountNumber, encryptionKey);
+
         if (i > 0) doc.addPage();
         doc.setFontSize(20);
         doc.text('노무비 지급 명세서', 105, 20, { align: 'center' });
         doc.setFontSize(10);
         doc.text(`발급일자: ${new Date().toLocaleDateString()}`, 190, 30, { align: 'right' });
         const empData = [
-            ['성명', data.name, '주민등록번호', data.residentId],
+            ['성명', data.name, '주민등록번호', decryptedResidentId],
             ['연락처', data.phoneNumber || data.address || '-', '소속', data.workPlace],
-            ['은행명', data.bankName, '계좌번호', data.accountNumber]
+            ['은행명', data.bankName, '계좌번호', decryptedAccountNumber]
         ];
         autoTable(doc, {
             startY: 35,
@@ -287,11 +300,15 @@ export const generateBulkPayslips = async (dataList: (Employee | SettlementData)
     doc.save(`전체_지급명세서_${new Date().toLocaleDateString()}.pdf`);
 };
 
-export const generateBulkEvidence = async (dataList: (Employee | SettlementData)[]) => {
+export const generateBulkEvidence = async (dataList: (Employee | SettlementData)[], encryptionKey: string) => {
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
     loadKoreanFont(doc);
     for (let i = 0; i < dataList.length; i++) {
         const data = dataList[i];
+        // Decrypt sensitive data
+        const decryptedResidentId = decrypt(data.residentId, encryptionKey);
+        const decryptedAccountNumber = decrypt(data.accountNumber, encryptionKey);
+
         if (i > 0) doc.addPage();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -332,10 +349,10 @@ export const generateBulkEvidence = async (dataList: (Employee | SettlementData)
         let infoY = tlY + 25;
         const lineH = 12;
         doc.text(`성       명: ${data.name}`, infoX, infoY); infoY += lineH;
-        doc.text(`주민등록번호: ${data.residentId}`, infoX, infoY); infoY += lineH;
+        doc.text(`주민등록번호: ${decryptedResidentId}`, infoX, infoY); infoY += lineH;
         doc.text(`연 락 처: ${data.phoneNumber || data.address || '-'}`, infoX, infoY); infoY += lineH;
         doc.text(`은 행 명: ${data.bankName}`, infoX, infoY); infoY += lineH;
-        doc.text(`계좌번호: ${data.accountNumber}`, infoX, infoY);
+        doc.text(`계좌번호: ${decryptedAccountNumber}`, infoX, infoY);
         const idCardData = await processImage(data.idCardImage);
         const bankBookData = await processImage(data.bankBookImage);
         const licenseData = await processImage(data.licenseImage);
