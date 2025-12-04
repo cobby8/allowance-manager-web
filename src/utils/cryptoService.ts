@@ -52,21 +52,13 @@ export const maskResidentId = (residentId: string): string => {
 };
 
 /**
- * Masks an account number (e.g., "123-456-7890" -> "123-***-7890" or similar).
- * Strategy: Keep first 3 and last 4 chars visible, mask the middle.
+ * Masks an account number by showing all except the last 5 digits.
+ * Example: "123456789012" -> "1234567*****"
  */
 export const maskAccountNumber = (accountNumber: string): string => {
     if (!accountNumber) return '';
-    if (accountNumber.length <= 6) return accountNumber; // Too short to mask effectively
+    if (accountNumber.length <= 5) return accountNumber; // Too short to mask
 
-    const visibleStart = 3;
-    const visibleEnd = 4;
-    const maskLength = accountNumber.length - visibleStart - visibleEnd;
-
-    if (maskLength <= 0) {
-        // Fallback for somewhat short numbers
-        return `${accountNumber.substring(0, 2)}${'*'.repeat(accountNumber.length - 2)}`;
-    }
-
-    return `${accountNumber.substring(0, visibleStart)}${'*'.repeat(maskLength)}${accountNumber.substring(accountNumber.length - visibleEnd)}`;
+    const visibleLength = accountNumber.length - 5;
+    return `${accountNumber.substring(0, visibleLength)}${'*'.repeat(5)}`;
 };

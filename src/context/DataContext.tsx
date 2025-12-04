@@ -12,7 +12,7 @@ interface DataContextType {
     loading: boolean;
     error: string | null;
     loadBaseData: (sheetId: string, encryptionKey: string) => Promise<void>;
-    loadWorkRecords: (sheetId: string) => Promise<void>;
+    loadWorkRecords: (sheetId: string, encryptionKey: string) => Promise<void>;
     resetData: () => void;
     hasBaseData: boolean;
     hasWorkRecords: boolean;
@@ -48,11 +48,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const loadWorkRecords = async (sheetId: string) => {
+    const loadWorkRecords = async (sheetId: string, encryptionKey: string) => {
         setLoading(true);
         setError(null);
         try {
-            const records = await fetchWorkRecordData(sheetId);
+            const records = await fetchWorkRecordData(sheetId, encryptionKey);
             setWorkRecords(records);
 
             // If base data already loaded, match them

@@ -1,7 +1,8 @@
 import { read, utils } from 'xlsx';
 import { WORK_RECORD_MAPPING, type WorkRecord } from '../types';
+import { encrypt } from './cryptoService';
 
-export const fetchWorkRecordData = async (sheetId: string): Promise<WorkRecord[]> => {
+export const fetchWorkRecordData = async (sheetId: string, encryptionKey: string): Promise<WorkRecord[]> => {
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
     try {
         const response = await fetch(url);
@@ -113,7 +114,13 @@ export const fetchWorkRecordData = async (sheetId: string): Promise<WorkRecord[]
                 if (['grossAmount', 'businessTax', 'localTax', 'netAmount'].includes(key)) {
                     record[key] = parseFloat(String(value || 0).replace(/,/g, '')) || 0;
                 } else {
-                    record[key] = String(value || '').trim();
+                    const strValue = String(value || '').trim();
+                    // Encrypt residentId field
+                    if (key === 'residentId' && strValue) {
+                        record[key] = encrypt(strValue, encryptionKey);
+                    } else {
+                        record[key] = strValue;
+                    }
                 }
             });
 

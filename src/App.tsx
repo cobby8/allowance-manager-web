@@ -44,7 +44,7 @@ function AppContent() {
 
   const handleLoadWork = async () => {
     if (workSheetId.trim()) {
-      await loadWorkRecords(workSheetId);
+      await loadWorkRecords(workSheetId, encryptionKey);
     }
   };
 
